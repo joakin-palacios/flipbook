@@ -1,0 +1,7 @@
+Specification
+
+mcu:
+- reads potentiometer values
+- process values
+- updates the motor speed
+- updates strobo 
