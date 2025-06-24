@@ -1,40 +1,92 @@
 from machine import ADC, Pin, PWM
 import neopixel
 import time
+import _thread
 
-wait=0.0001
-adc_value=0
+class global_values:
+    def __init__(self):
+        self.adc1 = 59626
+        self.adc2 = 59626
+        self.adc3 = 59626
+        self.old_adc1 = 59626
+        self.old_adc2 = 59626
+        self.old_adc3 = 59626
+        self.t_freq = time_between_events(41)
+        
 
-def ledctrl():
-    def time_between_events(freq_hz):
-        """
-        Calculate the time to wait between events at a given frequency.
 
-        :param freq_hz: Frequency in Hertz (Hz)
-        :return: Time between events in seconds
-        """
+def time_between_events(freq_hz):
         if freq_hz <= 0:
             raise ValueError("Frequency must be greater than zero.")
         return 1.0 / freq_hz
-    global wait
-    BLACK = (0, 0, 0)
-    WHITE = (255, 255, 255)
     
-    np = neopixel.NeoPixel(Pin(1), 9) # 10 cuz of nr of leds
+def ledctrl():
+    global vars
+    BLACK = (0, 0, 0)
+    WHITE = (255, 255, 255)   
+    np = neopixel.NeoPixel(Pin(18), 9) # 10 cuz of nr of leds
+    vars.t_freq=time_between_events(41)
     while True:
         np.fill(WHITE)
         np.write()
         time.sleep(0.000001)
         np.fill(BLACK)
         np.write()
-        time.sleep(time_between_events(41))
+        time.sleep(vars.t_freq)
         
     
-def pwmctrl(value):    
-    pwm = PWM(Pin(0))
-    pwm.freq(10000)  
-    pwm.duty_u16(value)
+def pwm_init():
+    global pwm
+    pwm = PWM(Pin(21))
+    pwm.freq(10000)
     
+def pwmctrl(value):
+    global pwm
+    pwm.duty_u16(value)
+
+def readingpots():
+    global pot, pot2, pot3, vars
+    vars.adc1 = pot.read_u16()  # Returns value between 0 and 65535
+    vars.adc2 = pot2.read_u16()  # Returns value between 0 and 65535
+    vars.adc3 = pot3.read_u16()  # Returns value between 0 and 65535
+    print("ADC 0:", vars.adc1,"ADC 1:", vars.adc2,"ADC 2:", vars.adc3 )
  
-pwmctrl(59626)
-ledctrl()
+
+def initpots():
+    global pot, pot2, pot3
+    pot = ADC(Pin(26))  # GP26 is ADC0
+    pot2 = ADC(Pin(27))  # GP26 is ADC0
+    pot3 = ADC(Pin(28))  # GP26 is ADC0
+
+        
+def change_detected(new, old, threshold = 1000):
+    change = abs(new - old)
+    if change >= threshold:
+        return True
+    return False
+
+
+def main():
+    global vars
+    #set up
+    _thread.start_new_thread(ledctrl, ())
+    pwm_init()
+    initpots()
+    pwmctrl(vars.old_adc1)
+    
+    #loop
+    while True:
+        readingpots()
+        time.sleep(0.5)
+        if change_detected(vars.adc1, vars.old_adc1):
+            vars.old_adc1 = vars.adc1
+            print("change in pot 1 detected")
+        if change_detected(vars.adc2, vars.old_adc2):
+            vars.old_adc2 = vars.adc2
+            print("change in pot 2 detected")
+        if change_detected(vars.adc3, vars.old_adc3):
+            vars.old_adc3 = vars.adc3
+            print("change in pot 3 detected")
+            
+vars = global_values()
+main()
