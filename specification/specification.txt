@@ -2,6 +2,6 @@ Specification
 
 mcu:
 - reads potentiometer values
-- process values
+- process values || see if values changed and update control values if yes. 
 - updates the motor speed
 - updates strobo 

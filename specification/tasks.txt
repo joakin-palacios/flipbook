@@ -1,11 +1,12 @@
 Task
 Hardware
-[ ] 
-[ ] 
-[ ] 
+[ ] make the thing that touches the motors cog out of metal (and better fixture) - maybe ask Nikola? 
+[ ] Stand for the light, maybe add 2 more of them (so that 3 in total)
+[ ] A box out of see through material so that ppl dont put shit in it
 [ ] 
 [ ] 
 Software
-[ ] get it up and running :D 
-[ ] 
-[ ] 
+[x] get it up and running :D 
+[ ] change the light modes from "wheel" to solid mapping
+[ ] enlarge range of strobe frequency
+
